@@ -1,0 +1,10 @@
+apiVersion: 1
+
+providers:
+  - name: 'Crack Monitoring Dashboard'
+    folder: ''
+    type: file
+    editable: true
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards

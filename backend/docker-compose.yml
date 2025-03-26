@@ -1,0 +1,73 @@
+services:
+  influxdb:
+    image: influxdb:2.7
+    #platform: linux/arm64
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_INIT_USERNAME}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_INIT_PASSWORD}
+      - DOCKER_INFLUXDB_INIT_ORG=CrackMon
+      - DOCKER_INFLUXDB_INIT_BUCKET=crackmon
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_INIT_ADMIN_TOKEN}
+    restart: always
+    networks:
+      - my_network
+
+  mqtt_to_influxdb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mqtt_to_influxdb
+    volumes:
+      - ./mqtt_to_influxdb.py:/app/mqtt_to_influxdb.py
+    environment:
+      - MQTT_BROKER=eu1.cloud.thethings.network
+      - MQTT_PORT=1883
+      - MQTT_USERNAME=${MQTT_USERNAME}
+      - MQTT_PASSWORD=${MQTT_PASSWORD}
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=${INFLUXDB_INIT_ADMIN_TOKEN}
+      - INFLUXDB_ORG=CrackMon
+      - INFLUXDB_BUCKET=crackmon
+    depends_on:
+      - influxdb
+    restart: always
+    networks:
+      - my_network
+
+  grafana:
+    image: grafana/grafana:latest
+    #platform: linux/arm64
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+    - grafana_data:/var/lib/grafana
+    - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+    - ./grafana/provisioning/dashboards/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+    depends_on:
+      - influxdb
+    restart: always
+    networks:
+      - my_network
+
+volumes:
+  influxdb_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  my_network:
+    driver: bridge

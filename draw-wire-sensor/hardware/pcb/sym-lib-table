@@ -1,0 +1,6 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "STS35-DIS")(type "KiCad")(uri "${KIPRJMOD}/libs/STS35-DIS.kicad_sym")(options "")(descr ""))
+  (lib (name "AS5600L-ASOM")(type "KiCad")(uri "${KIPRJMOD}/libs/AS5600L-ASOM.kicad_sym")(options "")(descr ""))
+  (lib (name "MCU_Heltec")(type "KiCad")(uri "${KIPRJMOD}/libs/MCU_Heltec.kicad_sym")(options "")(descr ""))
+)
